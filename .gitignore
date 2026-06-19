@@ -3,3 +3,4 @@ docs/
 .config/
 node_modules/
 dist/
+AGENTS.md

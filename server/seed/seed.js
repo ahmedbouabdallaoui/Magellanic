@@ -5,7 +5,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 const db = createClient(supabaseUrl, supabaseKey);
 
-const constellations = JSON.parse(readFileSync('./data/constellations.json', 'utf-8'));
+const constellations = JSON.parse(readFileSync(new URL('../../data/constellations.json', import.meta.url), 'utf-8'));
 
 async function seed() {
   for (const c of constellations) {

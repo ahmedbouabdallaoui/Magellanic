@@ -365,3 +365,9 @@ button:disabled {
   height: calc(100vh - 64px);
   background: var(--bg);
 }
+
+.explore-view {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 64px);
+}

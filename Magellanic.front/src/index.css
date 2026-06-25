@@ -359,3 +359,9 @@ button:disabled {
   background: var(--accent);
   color: #fff;
 }
+
+.starfield-canvas {
+  width: 100%;
+  height: calc(100vh - 64px);
+  background: var(--bg);
+}

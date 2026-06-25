@@ -217,3 +217,72 @@ button:disabled {
   color: var(--text-dim);
   line-height: 1.4;
 }
+
+.comment-section {
+  margin-top: 24px;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.comment-form textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment {
+  background: var(--bg);
+  border: 1px solid rgba(106, 90, 205, 0.1);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.comment-date {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.comment-delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.comment-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.comment-empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 24px;
+}

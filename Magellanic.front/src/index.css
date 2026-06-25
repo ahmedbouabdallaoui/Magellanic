@@ -165,3 +165,55 @@ button:disabled {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+
+.badge-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid rgba(106, 90, 205, 0.15);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.badge-earned {
+  border-color: var(--accent);
+}
+
+.badge-locked {
+  opacity: 0.5;
+}
+
+.badge-icon {
+  font-size: 1.6rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(106, 90, 205, 0.1);
+  border-radius: 50%;
+  color: var(--accent);
+}
+
+.badge-earned .badge-icon {
+  background: var(--accent);
+  color: #fff;
+}
+
+.badge-info {
+  flex: 1;
+}
+
+.badge-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.badge-caption {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}

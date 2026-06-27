@@ -371,3 +371,10 @@ button:disabled {
   width: 100%;
   height: calc(100vh - 64px);
 }
+
+.drawing-canvas {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 64px);
+  cursor: crosshair;
+}

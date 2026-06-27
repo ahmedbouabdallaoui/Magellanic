@@ -1,6 +1,7 @@
 :root {
   --bg: #0a0a1a;
-  --surface: #12122a;
+  --surface: rgba(18, 18, 42, 0.55);
+  --surface-solid: #12122a;
   --accent: #6a5acd;
   --accent-hover: #7b6ad8;
   --text: #e0e0f0;
@@ -9,6 +10,7 @@
   --success: #44cc88;
   --radius: 8px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --glass-blur: blur(12px);
 }
 
 * {
@@ -23,6 +25,47 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(106, 90, 205, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(100, 149, 237, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(72, 61, 139, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(224, 224, 240, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 45%, rgba(224, 224, 240, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 10%, rgba(224, 224, 240, 0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(224, 224, 240, 0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 30%, rgba(224, 224, 240, 0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 80%, rgba(224, 224, 240, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 90%, rgba(224, 224, 240, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 75%, rgba(224, 224, 240, 0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 25% 65%, rgba(224, 224, 240, 0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 75% 40%, rgba(224, 224, 240, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 35%, rgba(200, 200, 230, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 55%, rgba(200, 200, 230, 0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 15%, rgba(200, 200, 230, 0.25) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 5% 95%, rgba(200, 200, 230, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 70%, rgba(200, 200, 230, 0.3) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .app-layout {
@@ -51,6 +94,8 @@ main {
 
 .card {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.15);
   border-radius: var(--radius);
   padding: 24px;
@@ -58,7 +103,7 @@ main {
 }
 
 input, select, textarea {
-  background: var(--bg);
+  background: rgba(10, 10, 26, 0.4);
   border: 1px solid rgba(106, 90, 205, 0.2);
   border-radius: var(--radius);
   color: var(--text);
@@ -122,6 +167,8 @@ button:disabled {
   align-items: center;
   gap: 16px;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.15);
   border-radius: var(--radius);
   padding: 16px;
@@ -143,13 +190,17 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(106, 90, 205, 0.1);
+  background: rgba(106, 90, 205, 0.08);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 50%;
   color: var(--accent);
 }
 
 .badge-earned .badge-icon {
-  background: var(--accent);
+  background: rgba(106, 90, 205, 0.35);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: #fff;
 }
 
@@ -192,7 +243,9 @@ button:disabled {
 }
 
 .comment {
-  background: var(--bg);
+  background: rgba(10, 10, 26, 0.3);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.1);
   border-radius: var(--radius);
   padding: 8px;
@@ -245,6 +298,8 @@ button:disabled {
   width: 400px;
   height: 100vh;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-left: 1px solid rgba(106, 90, 205, 0.2);
   padding: 24px;
   overflow-y: auto;
@@ -337,6 +392,8 @@ button:disabled {
 
 .menu-toggle {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.2);
   color: var(--text);
   width: 40px;
@@ -361,6 +418,8 @@ button:disabled {
   right: 0;
   min-width: 180px;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.2);
   border-radius: var(--radius);
   padding: 8px 0;
@@ -404,6 +463,8 @@ button:disabled {
   transform: translateX(-50%);
   z-index: 200;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.3);
   border-radius: var(--radius);
   padding: 12px 24px;
@@ -433,6 +494,8 @@ button:disabled {
 
 .expert-exit-btn {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(106, 90, 205, 0.3);
   color: var(--text-dim);
   padding: 8px 16px;
@@ -457,6 +520,12 @@ button:disabled {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 32px 48px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(106, 90, 205, 0.3);
   animation: masteryEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -507,6 +576,8 @@ button:disabled {
   height: 100vh;
   overflow-y: auto;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-left: 1px solid rgba(106, 90, 205, 0.2);
   padding: 16px;
   animation: slideIn 0.3s ease-out;

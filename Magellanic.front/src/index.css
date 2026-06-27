@@ -328,7 +328,8 @@ button:disabled {
   margin-bottom: 24px;
 }
 
-.inspector-section h3 {
+.inspector-section h3,
+.inspector-section-title {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;

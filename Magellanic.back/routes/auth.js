@@ -8,20 +8,32 @@ const router = Router();
 
 router.post('/register', async (req, res) => {
   const { username, email, password, is_expert } = req.body;
+  const userEmail = email || `${username}@magellanic.app`;
   const hash = await bcrypt.hash(password, 10);
   const { data, error } = await db.from('users').insert({
-    username, email, password_hash: hash, is_expert: is_expert ?? false
+    username, email: userEmail, password_hash: hash, is_expert: is_expert ?? false
   }).select().single();
   if (error) return res.status(400).json({ error: error.message });
   const token = jwt.sign({ id: data.id, username: data.username }, JWT_SECRET);
-  res.json({ user: data, token });
+  const { password_hash, ...safe } = data;
+  res.json({ user: safe, token });
 });
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const { data: users, error } = await db.from('users').select('*').eq('email', email);
-  if (error || !users.length) return res.status(401).json({ error: 'Invalid credentials' });
-  const user = users[0];
+  const { data: byEmail, error: emailErr } = await db.from('users').select('*').eq('email', email);
+  if (!emailErr && byEmail?.length) {
+    const user = byEmail[0];
+    if (await bcrypt.compare(password, user.password_hash)) {
+      const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
+      const { password_hash, ...safe } = user;
+      return res.json({ user: safe, token });
+    }
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+  const { data: byUsername, error: userErr } = await db.from('users').select('*').eq('username', email);
+  if (userErr || !byUsername?.length) return res.status(401).json({ error: 'Invalid credentials' });
+  const user = byUsername[0];
   if (!(await bcrypt.compare(password, user.password_hash))) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }

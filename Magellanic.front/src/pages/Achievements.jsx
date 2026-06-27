@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/client';
+import { constellations as cApi, progress as pApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import AchievementBadge from '../components/AchievementBadge';
 
 export default function Achievements() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [constellations, setConstellations] = useState([]);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { navigate('/', { replace: true }); return; }
     Promise.all([
-      api.getConstellations(),
-      api.getProgress(),
-    ]).then(([cRes, pRes]) => {
-      setConstellations(cRes.data);
-      setProgress(pRes.data);
+      cApi.list(),
+      pApi.get(),
+    ]).then(([cData, pData]) => {
+      setConstellations(cData);
+      setProgress(pData);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [user]);
+  }, [user, authLoading]);
 
   const getProgress = (id) => progress.find(p => p.constellation_id === id);
 

@@ -1,39 +1,38 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../api/client';
+import { constellations as cApi, progress as pApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import CommentSection from '../components/CommentSection';
 
 export default function InspectorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [constellation, setConstellation] = useState(null);
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { navigate('/', { replace: true }); return; }
-    api.getConstellation(id).then(res => setConstellation(res.data)).catch(() => navigate('/explore'))
+    cApi.get(id).then(setConstellation).catch(() => navigate('/explore'))
       .finally(() => setLoading(false));
-    if (user) {
-      api.getProgress().then(res => {
-        const p = res.data.find(c => c.constellation_id === Number(id));
-        setProgress(p);
-      }).catch(() => {});
-    }
-  }, [id, user]);
+    pApi.get().then(data => {
+      const p = data.find(c => c.constellation_id === id);
+      setProgress(p);
+    }).catch(() => {});
+  }, [id, user, authLoading]);
 
   const handleDiscover = async () => {
     try {
-      await api.discoverConstellation(id);
+      await pApi.discover(id);
       setProgress(prev => ({ ...prev, discovered: true }));
     } catch {}
   };
 
   const handleDraw = async () => {
     try {
-      await api.drawConstellation(id);
+      await pApi.draw(id);
       setProgress(prev => ({ ...prev, drawn: true }));
     } catch {}
   };
@@ -48,7 +47,7 @@ export default function InspectorPage() {
           onClick={() => navigate(-1)}
           style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', marginBottom: 16, fontSize: '0.9rem' }}
         >
-          ← Back
+          Back
         </button>
         <h1 className="page-title" style={{ marginBottom: 4 }}>{constellation.name}</h1>
         <p style={{ color: 'var(--text-dim)', marginBottom: 24, fontSize: '0.9rem' }}>

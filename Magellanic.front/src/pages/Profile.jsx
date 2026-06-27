@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/client';
+import { progress as pApi, achievements as aApi, location as locApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [progress, setProgress] = useState([]);
   const [badges, setBadges] = useState([]);
@@ -14,15 +14,16 @@ export default function Profile() {
   const [locMsg, setLocMsg] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { navigate('/', { replace: true }); return; }
     Promise.all([
-      api.getProgress(),
-      api.getMilestones(),
-    ]).then(([pRes, mRes]) => {
-      setProgress(pRes.data);
-      setBadges(mRes.data || []);
+      pApi.get(),
+      aApi.userMilestones(),
+    ]).then(([pData, mData]) => {
+      setProgress(pData);
+      setBadges(mData || []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [user]);
+  }, [user, authLoading]);
 
   const discovered = progress.filter(p => p.discovered).length;
   const drawn = progress.filter(p => p.drawn).length;
@@ -30,7 +31,7 @@ export default function Profile() {
   const handleLocation = async (e) => {
     e.preventDefault();
     try {
-      await api.updateLocation(parseFloat(lat), parseFloat(lng));
+      await locApi.update(parseFloat(lat), parseFloat(lng));
       setLocMsg('Location updated');
     } catch {
       setLocMsg('Failed to update location');

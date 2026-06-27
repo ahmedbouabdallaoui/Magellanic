@@ -6,7 +6,7 @@ export default function DrawingCanvas({ constellation, onComplete }) {
   const [wrongFlash, setWrongFlash] = useState(false);
   const [completed, setCompleted] = useState(false);
 
-  const stars = constellation.stars || [];
+  const stars = constellation.stars_data || constellation.stars || [];
   const connections = constellation.connections || [];
 
   const normalizeStars = useCallback((stars) => {
@@ -19,7 +19,7 @@ export default function DrawingCanvas({ constellation, onComplete }) {
     const maxY = Math.max(...ys);
     const cx = (minX + maxX) / 2;
     const cy = (minY + maxY) / 2;
-    const range = Math.max(maxX - minX, maxY - minY, 1);
+    const range = Math.max(maxX - minX, maxY - minY, 0.001);
     return stars.map(s => ({
       x: ((s.x - cx) / range),
       y: ((s.y - cy) / range),

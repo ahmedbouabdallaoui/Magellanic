@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/client';
+import { progress as pApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import CommentSection from './CommentSection';
 
@@ -9,8 +9,8 @@ export default function InspectorPanel({ constellation, onClose }) {
 
   useEffect(() => {
     if (user) {
-      api.getProgress().then(res => {
-        const p = res.data.find(c => c.constellation_id === constellation.id);
+      pApi.get().then(data => {
+        const p = data.find(c => c.constellation_id === constellation.id);
         setProgress(p);
       }).catch(() => {});
     }
@@ -18,21 +18,21 @@ export default function InspectorPanel({ constellation, onClose }) {
 
   const handleDiscover = async () => {
     try {
-      await api.discoverConstellation(constellation.id);
+      await pApi.discover(constellation.id);
       setProgress(prev => ({ ...prev, discovered: true }));
     } catch {}
   };
 
   const handleDraw = async () => {
     try {
-      await api.drawConstellation(constellation.id);
+      await pApi.draw(constellation.id);
       setProgress(prev => ({ ...prev, drawn: true }));
     } catch {}
   };
 
   const handleBookmark = async () => {
     try {
-      await api.toggleBookmark(constellation.id);
+      await pApi.bookmark(constellation.id);
       setProgress(prev => ({ ...prev, bookmarked: !prev?.bookmarked }));
     } catch {}
   };

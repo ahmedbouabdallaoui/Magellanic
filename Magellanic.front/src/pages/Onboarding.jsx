@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Onboarding() {
-  const { login, register, user } = useAuth();
+  const { login, register, user, loading } = useAuth();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  if (user) {
-    navigate('/explore', { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/explore', { replace: true });
+    }
+  }, [user, loading]);
+
+  if (loading) return <div className="page"><div className="loader" /></div>;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +29,7 @@ export default function Onboarding() {
       }
       navigate('/explore');
     } catch (err) {
-      setError(err.response?.data?.error || 'Something went wrong');
+      setError(err.message || 'Something went wrong');
     }
   };
 

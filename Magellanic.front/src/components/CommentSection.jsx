@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/client';
+import { comments as cApi } from '../api/client';
 
 export default function CommentSection({ constellationId }) {
   const [comments, setComments] = useState([]);
@@ -12,10 +12,9 @@ export default function CommentSection({ constellationId }) {
 
   const loadComments = async () => {
     try {
-      const res = await api.getComments(constellationId);
-      setComments(res.data);
+      const data = await cApi.list(constellationId);
+      setComments(data);
     } catch {
-      // silently fail
     } finally {
       setLoading(false);
     }
@@ -25,20 +24,18 @@ export default function CommentSection({ constellationId }) {
     e.preventDefault();
     if (!text.trim()) return;
     try {
-      const res = await api.createComment(constellationId, text);
-      setComments([res.data, ...comments]);
+      const data = await cApi.create(constellationId, text);
+      setComments([data, ...comments]);
       setText('');
     } catch {
-      // silently fail
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await api.deleteComment(constellationId, id);
+      await cApi.delete(id);
       setComments(comments.filter(c => c.id !== id));
     } catch {
-      // silently fail
     }
   };
 

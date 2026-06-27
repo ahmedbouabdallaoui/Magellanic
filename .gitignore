@@ -1,5 +1,6 @@
 .env
 docs/
+.superpowers/
 .config/
 node_modules/
 dist/

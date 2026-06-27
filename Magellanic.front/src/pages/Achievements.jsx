@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { constellations as cApi, progress as pApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
-import AchievementBadge from '../components/AchievementBadge';
 
 export default function Achievements() {
   const { user, loading: authLoading } = useAuth();
@@ -31,57 +30,88 @@ export default function Achievements() {
   const drawn = constellations.filter(c => getProgress(c.id)?.drawn);
 
   return (
-    <div className="page">
-      <h1 className="page-title">Achievements</h1>
+    <div className="achv-page">
+      <div className="achv-header">
+        <h1 className="achv-title">Catalogue</h1>
+        <p className="achv-subtitle">Your celestial discoveries</p>
+      </div>
 
-      <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <div className="card" style={{ textAlign: 'center', minWidth: 140 }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{discovered.length}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Discovered</div>
+      <div className="achv-stats">
+        <div className="achv-stat">
+          <span className="achv-stat-icon">✦</span>
+          <span className="achv-stat-num">{discovered.length}</span>
+          <span className="achv-stat-label">Discovered</span>
         </div>
-        <div className="card" style={{ textAlign: 'center', minWidth: 140 }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{drawn.length}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Drawn</div>
+        <div className="achv-stat">
+          <span className="achv-stat-icon">✧</span>
+          <span className="achv-stat-num">{drawn.length}</span>
+          <span className="achv-stat-label">Mastered</span>
+        </div>
+        <div className="achv-stat">
+          <span className="achv-stat-icon">⋆</span>
+          <span className="achv-stat-num">{constellations.length}</span>
+          <span className="achv-stat-label">Total</span>
         </div>
       </div>
 
-      <h2 style={{ fontSize: '1.2rem', marginBottom: 16, alignSelf: 'flex-start' }}>Discovery Badges</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 500 }}>
-        {constellations.map(c => {
-          const p = getProgress(c.id);
-          return (
-            <AchievementBadge
-              key={c.id}
-              badge={{
-                type: 'discovery',
-                constellation_name: c.name,
-                caption: c.discovery_badge_caption || 'Found in the night sky',
-              }}
-              earned={p?.discovered}
-            />
-          );
-        })}
-        {constellations.length === 0 && (
-          <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>No constellations loaded.</p>
-        )}
+      <div className="achv-section">
+        <div className="achv-section-head">
+          <span className="achv-section-icon">✦</span>
+          <h2>Discovery Badges</h2>
+          <span className="achv-section-count">{discovered.length}/{constellations.length}</span>
+        </div>
+        <div className="achv-grid">
+          {constellations.map((c, i) => {
+            const p = getProgress(c.id);
+            const earned = !!p?.discovered;
+            return (
+              <div
+                key={c.id}
+                className={`achv-card ${earned ? 'earned' : 'locked'}`}
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <span className="achv-card-icon">{earned ? '✦' : '☆'}</span>
+                <div className="achv-card-body">
+                  <span className="achv-card-name">{c.name}</span>
+                  <span className="achv-card-caption">
+                    {earned ? (c.discovery_badge_caption || 'Found in the night sky') : 'Not yet discovered'}
+                  </span>
+                </div>
+                {earned && <span className="achv-card-check">✦</span>}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <h2 style={{ fontSize: '1.2rem', marginBottom: 16, marginTop: 32, alignSelf: 'flex-start' }}>Mastery Badges</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 500 }}>
-        {constellations.map(c => {
-          const p = getProgress(c.id);
-          return (
-            <AchievementBadge
-              key={c.id}
-              badge={{
-                type: 'mastery',
-                constellation_name: c.name,
-                caption: c.mastery_badge_caption || 'Mastered by drawing',
-              }}
-              earned={p?.drawn}
-            />
-          );
-        })}
+      <div className="achv-section">
+        <div className="achv-section-head">
+          <span className="achv-section-icon">✧</span>
+          <h2>Mastery Badges</h2>
+          <span className="achv-section-count">{drawn.length}/{constellations.length}</span>
+        </div>
+        <div className="achv-grid">
+          {constellations.map((c, i) => {
+            const p = getProgress(c.id);
+            const earned = !!p?.drawn;
+            return (
+              <div
+                key={c.id}
+                className={`achv-card ${earned ? 'earned' : 'locked'}`}
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <span className="achv-card-icon">{earned ? '✧' : '☆'}</span>
+                <div className="achv-card-body">
+                  <span className="achv-card-name">{c.name}</span>
+                  <span className="achv-card-caption">
+                    {earned ? (c.mastery_badge_caption || 'Mastered by drawing') : 'Not yet mastered'}
+                  </span>
+                </div>
+                {earned && <span className="achv-card-check">✧</span>}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ export default function Profile() {
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
   const [locMsg, setLocMsg] = useState('');
+  const [locSaving, setLocSaving] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -30,12 +31,14 @@ export default function Profile() {
 
   const handleLocation = async (e) => {
     e.preventDefault();
+    setLocSaving(true);
     try {
       await locApi.update(parseFloat(lat), parseFloat(lng));
-      setLocMsg('Location updated');
+      setLocMsg('Coordinates recorded');
     } catch {
-      setLocMsg('Failed to update location');
+      setLocMsg('Failed to update');
     }
+    setLocSaving(false);
   };
 
   const handleDetect = () => {
@@ -44,40 +47,49 @@ export default function Profile() {
         setLat(pos.coords.latitude.toFixed(4));
         setLng(pos.coords.longitude.toFixed(4));
       },
-      () => setLocMsg('Could not detect location')
+      () => setLocMsg('Location unavailable')
     );
   };
 
-  if (loading) return <div className="page"><div className="loader" /></div>;
+  if (loading) return <div className="profile-page"><div className="loader" /></div>;
+
+  const initial = user?.username?.charAt(0).toUpperCase() || '?';
 
   return (
-    <div className="page">
-      <div className="card" style={{ maxWidth: 450, width: '100%' }}>
-        <h1 className="page-title" style={{ marginBottom: 8 }}>{user?.username}</h1>
-        <p style={{ color: 'var(--text-dim)', marginBottom: 24, fontSize: '0.85rem' }}>
-          Member since {new Date(user?.created_at).toLocaleDateString()}
+    <div className="profile-page">
+      <div className="profile-hero">
+        <div className="profile-avatar">{initial}</div>
+        <h1 className="profile-name">{user?.username}</h1>
+        <p className="profile-member">
+          Observer since {new Date(user?.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
         </p>
+      </div>
 
-        <div style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
-          <div className="card" style={{ flex: 1, textAlign: 'center', padding: 16 }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--accent)' }}>{discovered}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Discovered</div>
-          </div>
-          <div className="card" style={{ flex: 1, textAlign: 'center', padding: 16 }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--accent)' }}>{drawn}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Drawn</div>
-          </div>
-          <div className="card" style={{ flex: 1, textAlign: 'center', padding: 16 }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--accent)' }}>{badges.length}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Milestones</div>
-          </div>
+      <div className="profile-stats">
+        <div className="profile-stat">
+          <span className="profile-stat-icon">✦</span>
+          <span className="profile-stat-num">{discovered}</span>
+          <span className="profile-stat-label">Discovered</span>
         </div>
+        <div className="profile-stat">
+          <span className="profile-stat-icon">✧</span>
+          <span className="profile-stat-num">{drawn}</span>
+          <span className="profile-stat-label">Drawn</span>
+        </div>
+        <div className="profile-stat">
+          <span className="profile-stat-icon">★</span>
+          <span className="profile-stat-num">{badges.length}</span>
+          <span className="profile-stat-label">Milestones</span>
+        </div>
+      </div>
 
-        <form onSubmit={handleLocation} style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: 12 }}>
-            Location
-          </h3>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+      <div className="profile-section">
+        <div className="profile-section-head">
+          <span className="profile-section-icon">⟐</span>
+          <h3>Observation Log</h3>
+        </div>
+        <form onSubmit={handleLocation} className="profile-loc-form">
+          <div className="profile-loc-inputs">
             <input
               placeholder="Latitude"
               value={lat}
@@ -93,32 +105,38 @@ export default function Profile() {
               step="any"
             />
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" disabled={!lat || !lng}>Save</button>
-            <button type="button" onClick={handleDetect} className="btn-outline">Detect</button>
+          <div className="profile-loc-actions">
+            <button type="submit" disabled={!lat || !lng || locSaving}>
+              {locSaving ? 'Saving...' : 'Record'}
+            </button>
+            <button type="button" onClick={handleDetect} className="btn-outline">
+              Auto-detect
+            </button>
           </div>
-          {locMsg && <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: 8 }}>{locMsg}</p>}
+          {locMsg && <p className="profile-loc-msg">{locMsg}</p>}
         </form>
-
-        {badges.length > 0 && (
-          <div>
-            <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: 12 }}>
-              Milestone Badges
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {badges.map((b, i) => (
-                <div key={i} className="badge-card badge-earned">
-                  <div className="badge-icon">★</div>
-                  <div className="badge-info">
-                    <div className="badge-name">{b.name}</div>
-                    <div className="badge-caption">{b.caption}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {badges.length > 0 && (
+        <div className="profile-section">
+          <div className="profile-section-head">
+            <span className="profile-section-icon">★</span>
+            <h3>Milestone Badges</h3>
+            <span className="profile-section-count">{badges.length}</span>
+          </div>
+          <div className="profile-badges">
+            {badges.map((b, i) => (
+              <div key={i} className="profile-badge" style={{ animationDelay: `${i * 50}ms` }}>
+                <span className="profile-badge-icon">★</span>
+                <div className="profile-badge-body">
+                  <span className="profile-badge-name">{b.name}</span>
+                  <span className="profile-badge-caption">{b.caption}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

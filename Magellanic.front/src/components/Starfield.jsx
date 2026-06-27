@@ -1,14 +1,64 @@
 import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import useWheelTargetLock from '../hooks/useWheelTargetLock';
+
+function FirstPersonController() {
+  const { camera, gl } = useThree();
+  const isDragging = useRef(false);
+  const prev = useRef({ x: 0, y: 0 });
+  const euler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'));
+  const fwd = useRef(new THREE.Vector3());
+  const targetDist = useRef(camera.position.length());
+
+  useEffect(() => {
+    const el = gl.domElement;
+    const onDown = (e) => { isDragging.current = true; prev.current = { x: e.clientX, y: e.clientY }; };
+    const onMove = (e) => {
+      if (!isDragging.current) return;
+      const dx = e.clientX - prev.current.x;
+      const dy = e.clientY - prev.current.y;
+      prev.current = { x: e.clientX, y: e.clientY };
+      euler.current.setFromQuaternion(camera.quaternion);
+      euler.current.y -= dx * 0.005;
+      euler.current.x -= dy * 0.005;
+      euler.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.current.x));
+      camera.quaternion.setFromEuler(euler.current);
+    };
+    const onUp = () => { isDragging.current = false; };
+    const onWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -1 : 1;
+      fwd.current.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      const step = fwd.current.clone().multiplyScalar(delta * 8);
+      const next = camera.position.clone().add(step);
+      if (next.length() > MAX_RADIUS) return;
+      if (next.length() < 1) return;
+      camera.position.copy(next);
+    };
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointerleave', onUp);
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointerleave', onUp);
+      el.removeEventListener('wheel', onWheel);
+    };
+  }, [camera, gl]);
+
+  return null;
+}
+
+const MAX_RADIUS = 1000;
 
 function randomStarField(count) {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    const r = 200 + Math.random() * 800;
+    const r = 500 + Math.random() * 2500;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
     positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -40,7 +90,7 @@ function BackgroundStars() {
 
   return (
     <points ref={ref} geometry={geom}>
-      <pointsMaterial size={0.6} vertexColors sizeAttenuation opacity={0.9} transparent />
+      <pointsMaterial size={1.5} vertexColors sizeAttenuation opacity={0.9} transparent />
     </points>
   );
 }
@@ -88,9 +138,7 @@ function computeCenter(stars, distanceLy = 80) {
 
 function FocusController({ targetCenter }) {
   const { camera } = useThree();
-  const controls = useThree(s => s.controls);
   const INITIAL_POS = useMemo(() => new THREE.Vector3(0, 0, 50), []);
-  const INITIAL_TARGET = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   const returning = useRef(false);
 
   useFrame((_, delta) => {
@@ -99,67 +147,16 @@ function FocusController({ targetCenter }) {
       const VIEW_OFFSET = 20;
       const camTarget = new THREE.Vector3(targetCenter.x, targetCenter.y, targetCenter.z + VIEW_OFFSET);
       camera.position.lerp(camTarget, delta * 2);
-      if (controls) {
-        controls.target.lerp(targetCenter, delta * 2);
-      }
+      camera.lookAt(targetCenter.x, targetCenter.y, targetCenter.z);
     } else if (returning.current) {
       camera.position.lerp(INITIAL_POS, delta * 2);
-      if (controls) {
-        controls.target.lerp(INITIAL_TARGET, delta * 2);
-      }
-      if (camera.position.distanceTo(INITIAL_POS) < 0.5 &&
-          controls?.target?.distanceTo(INITIAL_TARGET) < 0.5) {
+      camera.lookAt(0, 0, 0);
+      if (camera.position.distanceTo(INITIAL_POS) < 0.5) {
         returning.current = false;
       }
     }
   });
 
-
-  return null;
-}
-
-function WheelTargetLock({ entries }) {
-  const { camera } = useThree();
-  const controlsRef = useRef();
-  const cameraRef = useRef();
-  cameraRef.current = camera;
-
-  useWheelTargetLock(controlsRef, entries, cameraRef);
-
-  const controls = useThree(s => s.controls);
-  controlsRef.current = controls;
-
-  useEffect(() => {
-    if (!controls || !camera) return;
-
-    const logState = () => {
-      console.group('OrbitControls state');
-      console.log('camera type:', camera.type);
-      console.log('camera position:', camera.position);
-      console.log('camera near/far:', camera.near, camera.far);
-      console.log('controls.target:', controls.target);
-      console.log('controls.minDistance:', controls.minDistance);
-      console.log('controls.maxDistance:', controls.maxDistance);
-      console.log('controls.minZoom:', controls.minZoom);
-      console.log('controls.maxZoom:', controls.maxZoom);
-      console.log('controls.enableZoom:', controls.enableZoom);
-      console.log('controls.enableDamping:', controls.enableDamping);
-      console.log('controls.zoomSpeed:', controls.zoomSpeed);
-      console.log('distance to target:', controls.getDistance());
-      if (entries.length > 0) {
-        const centers = entries.map(e => e.center || e);
-        const dists = centers.map(c => camera.position.distanceTo(new THREE.Vector3(c.x, c.y, c.z)));
-        console.log('nearest constellation distance:', Math.min(...dists));
-        console.log('constellations loaded:', entries.length);
-      }
-      console.groupEnd();
-    };
-
-    controls.addEventListener('end', logState);
-    logState();
-
-    return () => controls.removeEventListener('end', logState);
-  }, [controls, camera, entries]);
 
   return null;
 }
@@ -493,10 +490,10 @@ export default function Starfield({
 
   return (
     <div className={`starfield-canvas ${mode === 'expert' ? 'starfield-expert' : ''}`}>
-      <Canvas camera={{ position: [0, 0, 50], fov: 60 }}>
+      <Canvas camera={{ position: [0, 0, 50], fov: 60, far: 5000 }}>
         <BackgroundStars />
+        <FirstPersonController />
         <FocusController targetCenter={focusCenter} />
-        <WheelTargetLock entries={constellationData} />
         <ProximitySensor
           entries={constellationData}
           threshold={50}
@@ -522,7 +519,6 @@ export default function Starfield({
             />
           </group>
         ))}
-        <OrbitControls enablePan={false} enableZoom={true} makeDefault />
       </Canvas>
     </div>
   );
